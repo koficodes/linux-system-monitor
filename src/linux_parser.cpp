@@ -1,9 +1,10 @@
+#include "linux_parser.h"
 #include <dirent.h>
 #include <unistd.h>
+#include <chrono>
 #include <string>
+#include <thread>
 #include <vector>
-
-#include "linux_parser.h"
 
 using std::stof;
 using std::string;
@@ -78,12 +79,27 @@ float LinuxParser::MemoryUtilization() {
 
     std::getline(stream, line);
     std::istringstream linestream2(line);
-    return std::stoi(total_memory) - std::stoi(free_memory);
+    linestream2 >> info_name >> free_memory >> unit;
+    float rem_memory = std::stof(total_memory) - std::stof(free_memory);
+    return 100 * (rem_memory / std::stof(total_memory));
   }
+
+  return 0.0;
 }
 
 // TODO: Read and return the system uptime
-long LinuxParser::UpTime() { return 0; }
+long LinuxParser::UpTime() {
+  std::string line;
+  std::ifstream stream(kProcDirectory + kUptimeFilename);
+  if (stream.is_open()) {
+    std::getline(stream, line);
+    std::istringstream linestream(line);
+    float uptime, idletime;
+    linestream >> uptime >> idletime;
+    return uptime;
+  }
+  return 0;
+}
 
 // TODO: Read and return the number of jiffies for the system
 long LinuxParser::Jiffies() { return 0; }
@@ -99,7 +115,21 @@ long LinuxParser::ActiveJiffies() { return 0; }
 long LinuxParser::IdleJiffies() { return 0; }
 
 // TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization() { return {}; }
+
+vector<string> LinuxParser::CpuUtilization() {
+  std::string cpu, line, user, nice, system, idle, iowait, irq, softirq, steal,
+      guest, guest_nice;
+  std::ifstream stream(kProcDirectory + kStatFilename);
+  if (stream.is_open()) {
+    std::getline(stream, line);
+    std::istringstream linestream(line);
+    linestream >> cpu >> user >> nice >> system >> idle >> iowait >> irq >>
+        softirq >> steal >> guest >> guest_nice;
+    return std::vector{user, nice,    system, idle,  iowait,
+                       irq,  softirq, steal,  guest, guest_nice};
+  }
+  return {};
+}
 
 // TODO: Read and return the total number of processes
 int LinuxParser::TotalProcesses() { return 0; }
