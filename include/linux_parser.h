@@ -45,7 +45,7 @@ long Jiffies();
 long ActiveJiffies();
 long ActiveJiffies(int pid);
 long IdleJiffies();
-
+int GetValueWithKey(std::string key, std::string path);
 // Processes
 std::string Command(int pid);
 std::string Ram(int pid);

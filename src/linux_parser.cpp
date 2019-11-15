@@ -2,6 +2,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <chrono>
+#include <iostream>
 #include <string>
 #include <thread>
 #include <vector>
@@ -133,7 +134,7 @@ vector<string> LinuxParser::CpuUtilization() {
 
 // TODO: Read and return the total number of processes
 
-int GetValueWithKey(std::string key, std::string path) {
+int LinuxParser::GetValueWithKey(std::string key, std::string path) {
   std::string line, keyInFile;
   int valueInFile;
   std::ifstream stream(path);
@@ -162,19 +163,49 @@ int LinuxParser::RunningProcesses() {
 
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Command(int pid) {}
+string LinuxParser::Command(int pid) {
+  string line;
+  std::ifstream stream(LinuxParser::kProcDirectory + to_string(pid) +
+                       LinuxParser::kCmdlineFilename);
+  std::getline(stream, line);
+  return line;
+}
 
 // TODO: Read and return the memory used by a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Ram(int pid[[maybe_unused]]) { return string(); }
+string LinuxParser::Ram(int pid) {
+  string path = LinuxParser::kProcDirectory + to_string(pid) +
+                LinuxParser::kStatusFilename;
+  return to_string(LinuxParser::GetValueWithKey("VmSize:", path));
+}
 
 // TODO: Read and return the user ID associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Uid(int pid[[maybe_unused]]) { return string(); }
+string LinuxParser::Uid(int pid) {
+  string path = LinuxParser::kProcDirectory + to_string(pid) +
+                LinuxParser::kStatusFilename;
+  return to_string(LinuxParser::GetValueWithKey("Uid:", path));
+}
 
 // TODO: Read and return the user associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::User(int pid[[maybe_unused]]) { return string(); }
+
+string LinuxParser::User(int pid) {
+  string uid = LinuxParser::Uid(pid);
+  string path = LinuxParser::kPasswordPath;
+  string line;
+  std::ifstream stream(path);
+  while (std::getline(stream, line)) {
+    std::replace(line.begin(), line.end(), ':', ' ');
+    std::istringstream linestream(line);
+    string name, x, uid_;
+    linestream >> name >> x >> uid_;
+    if (uid == uid_) {
+      return name;
+    }
+  }
+  return "";
+}
 
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
