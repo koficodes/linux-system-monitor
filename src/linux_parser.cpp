@@ -176,7 +176,8 @@ string LinuxParser::Command(int pid) {
 string LinuxParser::Ram(int pid) {
   string path = LinuxParser::kProcDirectory + to_string(pid) +
                 LinuxParser::kStatusFilename;
-  return to_string(LinuxParser::GetValueWithKey("VmSize:", path));
+  return to_string(LinuxParser::GetValueWithKey("VmSize:", path) /
+                   float(1024 * 1024));
 }
 
 // TODO: Read and return the user ID associated with a process
@@ -209,4 +210,12 @@ string LinuxParser::User(int pid) {
 
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::UpTime(int pid[[maybe_unused]]) { return 0; }
+long LinuxParser::UpTime(int pid) {
+  string line;
+  string path =
+      LinuxParser::kProcDirectory + to_string(pid) + LinuxParser::kStatFilename;
+  std::ifstream stream(path);
+  std::istream_iterator<string> start(stream), end;
+  std::vector<string> pidValues{start, end};
+  return std::stol(pidValues[21]) / sysconf(_SC_CLK_TCK);
+}
