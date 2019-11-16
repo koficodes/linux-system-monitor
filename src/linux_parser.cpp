@@ -217,5 +217,8 @@ long LinuxParser::UpTime(int pid) {
   std::ifstream stream(path);
   std::istream_iterator<string> start(stream), end;
   std::vector<string> pidValues{start, end};
-  return std::stol(pidValues[21]) / sysconf(_SC_CLK_TCK);
+  int utimeIndex = 13;
+  float clockTicks = sysconf(_SC_CLK_TCK);
+  float utime = std::stof(pidValues[utimeIndex]);
+  return (long)utime / clockTicks;
 }

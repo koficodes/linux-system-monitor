@@ -16,9 +16,29 @@ using std::vector;
 int Process::Pid() { return pid_; }
 
 // TODO: Return this process's CPU utilization
-float Process::CpuUtilization() { return 0; }
+float Process::CpuUtilization() {
+  string line;
+  string path = LinuxParser::kProcDirectory + to_string(pid_) +
+                LinuxParser::kStatFilename;
+  std::ifstream stream(path);
+  std::istream_iterator<string> start(stream), end;
+  std::vector<string> pidValues{start, end};
+  float uptime = std::stof(pidValues[0]);
+  float utime = std::stof(pidValues[13]);
+  float stime = std::stof(pidValues[14]);
+  float cutime = std::stof(pidValues[15]);
+  float cstime = std::stof(pidValues[16]);
+  float starttime = std::stof(pidValues[21]);
+  float hertz = sysconf(_SC_CLK_TCK);
 
-// TODO: Return the command that generated this process
+  // including child processes
+  float total_time = utime + stime + cutime + cstime;
+
+  float seconds = uptime - (starttime / hertz);
+
+  return 100.00 * ((total_time / hertz) / seconds);
+}
+
 string Process::Command() { return LinuxParser::Command(pid_); }
 
 // TODO: Return this process's memory utilization
