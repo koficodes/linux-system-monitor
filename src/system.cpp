@@ -1,5 +1,6 @@
 #include "system.h"
 #include <unistd.h>
+#include <algorithm>
 #include <cstddef>
 #include <iostream>
 #include <set>
@@ -19,9 +20,14 @@ Processor& System::Cpu() { return cpu_; }
 // TODO: Return a container composed of the system's processes
 vector<Process>& System::Processes() {
   auto pids = LinuxParser::Pids();
+
+  if (!processes_.empty()) processes_ = {};  // clear all previous elements
+
   for (auto& i : pids) {
-    processes_.push_back(Process(i));
+    processes_.emplace_back(Process(i));
   }
+  std::sort(processes_.begin(), processes_.end());
+
   return processes_;
 }
 

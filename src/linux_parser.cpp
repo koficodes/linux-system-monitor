@@ -70,19 +70,20 @@ vector<int> LinuxParser::Pids() {
 
 // TODO: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() {
-  std::string total_memory, free_memory, line, unit, info_name;
+  std::string totalMemory, freeMemory, line, unit, infoName;
   std::string path = kProcDirectory + kMeminfoFilename;
   std::ifstream stream(path);
   if (stream.is_open()) {
     std::getline(stream, line);
     std::istringstream linestream(line);
-    linestream >> info_name >> total_memory >> unit;
+    linestream >> infoName >> totalMemory >> unit;
 
     std::getline(stream, line);
     std::istringstream linestream2(line);
-    linestream2 >> info_name >> free_memory >> unit;
-    float rem_memory = std::stof(total_memory) - std::stof(free_memory);
-    return 100 * (rem_memory / std::stof(total_memory));
+    linestream2 >> infoName >> freeMemory >> unit;
+    float remainingMemory = std::stof(totalMemory) - std::stof(freeMemory);
+    stream.close();
+    return (remainingMemory / std::stof(totalMemory));
   }
 
   return 0.0;
@@ -97,6 +98,7 @@ long LinuxParser::UpTime() {
     std::istringstream linestream(line);
     float uptime, idletime;
     linestream >> uptime >> idletime;
+    stream.close();
     return uptime;
   }
   return 0;
@@ -129,6 +131,7 @@ vector<string> LinuxParser::CpuUtilization() {
     std::istringstream linestream(line);
     linestream >> cpu >> user >> nice >> system >> idle >> iowait >> irq >>
         softirq >> steal >> guest >> guest_nice;
+    stream.close();
     return std::vector{user, nice,    system, idle,  iowait,
                        irq,  softirq, steal,  guest, guest_nice};
   }
@@ -146,6 +149,7 @@ int LinuxParser::GetValueWithKey(std::string key, std::string path) {
       std::istringstream linestream(line);
       while (linestream >> keyInFile >> valueInFile) {
         if (keyInFile == key) {
+          stream.close();
           return valueInFile;
         }
       }

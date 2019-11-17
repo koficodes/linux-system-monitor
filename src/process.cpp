@@ -23,7 +23,7 @@ float Process::CpuUtilization() {
   std::ifstream stream(path);
   std::istream_iterator<string> start(stream), end;
   std::vector<string> pidValues{start, end};
-  float uptime = std::stof(pidValues[0]);
+  float uptime = LinuxParser::UpTime();
   float utime = std::stof(pidValues[13]);
   float stime = std::stof(pidValues[14]);
   float cutime = std::stof(pidValues[15]);
@@ -35,8 +35,8 @@ float Process::CpuUtilization() {
   float total_time = utime + stime + cutime + cstime;
 
   float seconds = uptime - (starttime / hertz);
-
-  return 100.00 * ((total_time / hertz) / seconds);
+  stream.close();
+  return (total_time / hertz) / seconds;
 }
 
 string Process::Command() { return LinuxParser::Command(pid_); }
@@ -53,5 +53,5 @@ long int Process::UpTime() { return LinuxParser::UpTime(pid_); }
 // TODO: Overload the "less than" comparison operator for Process objects
 // REMOVE: [[maybe_unused]] once you define the function
 bool Process::operator<(Process& a) {
-  return this->CpuUtilization() < a.CpuUtilization();
+  return this->CpuUtilization() > a.CpuUtilization();
 }
