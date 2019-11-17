@@ -21,7 +21,7 @@ Processor& System::Cpu() { return cpu_; }
 vector<Process>& System::Processes() {
   auto pids = LinuxParser::Pids();
 
-  if (!processes_.empty()) processes_ = {};  // clear all previous elements
+  if (!processes_.empty()) processes_.clear();  // clear all previous elements
 
   for (auto& i : pids) {
     processes_.emplace_back(Process(i));
