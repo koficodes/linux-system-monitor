@@ -212,8 +212,7 @@ string LinuxParser::Ram(int pid) {
   // VmData gives the exact physical memory being used as a part of Physical RAM
   // ref: http://man7.org/linux/man-pages/man5/proc.5.html
 
-  return to_string(LinuxParser::GetValueWithKey("VmSize:", path) /
-                   float(1024 * 1024));
+  return to_string(LinuxParser::GetValueWithKey("VmData:", path) / float(1024));
 }
 
 // Read and return the user ID associated with a process
